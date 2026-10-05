@@ -337,6 +337,27 @@ dialog::backdrop{background:rgba(22,25,29,.6)}
 .pass .btn{width:100%;margin-top:1rem}
 .pass .fine{margin-top:.75rem;font-size:.85rem;color:var(--slate);text-align:center}
 
+/* payment */
+.plan .pay-link{margin-top:.75rem;background:none;border:0;padding:0;font:inherit;font-size:.95rem;font-weight:700;color:inherit;text-decoration:underline;text-decoration-thickness:2px;text-decoration-color:var(--light-deep);text-underline-offset:4px;cursor:pointer;align-self:center}
+.pay-plans{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.6rem}
+.pay-plans label{position:relative;display:block}
+.pay-plans input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.pay-plans span{display:block;border:1.5px solid var(--line);border-radius:10px;padding:.8rem .9rem;font-size:.92rem;color:var(--slate)}
+.pay-plans span b{display:block;color:var(--ink);font-size:1rem}
+.pay-plans input:checked+span{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.pay-plans input:focus-visible+span{outline:3px solid var(--light-deep);outline-offset:2px}
+.pay-sum{margin-top:1.25rem;border-radius:10px;background:var(--mist);padding:1rem 1.15rem;display:grid;gap:.45rem}
+.pay-sum div{display:flex;justify-content:space-between;gap:1rem;font-size:.95rem}
+.pay-sum .tot{border-top:1px solid var(--line);padding-top:.55rem;font-weight:800}
+.pay-sum .tot b{font-stretch:125%;font-size:1.25rem}
+.pay-note{margin-top:.9rem;font-size:.9rem;color:var(--slate)}
+.pay-alt{margin-top:.75rem;text-align:center;font-size:.92rem;color:var(--slate)}
+.pay-alt a{font-weight:700;color:var(--ink)}
+#dlg-pay .btn,#dlg-paid .btn{width:100%;margin-top:1rem}
+.paid-tick{width:56px;height:56px;border-radius:50%;background:var(--light);display:grid;place-content:center;margin-bottom:1rem}
+.paid-tick::after{content:"";width:22px;height:11px;border-left:3.5px solid var(--ink);border-bottom:3.5px solid var(--ink);transform:translateY(-3px) rotate(-45deg)}
+@media (max-width:560px){.pay-plans{grid-template-columns:1fr}}
+
 /* responsive */
 @media (max-width:1020px){
   .menu{display:none}
@@ -579,7 +600,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       </li>
       <li>
         <h3>Stay on if it works</h3>
-        <p>Complete the <button class="link-btn" data-open="dlg-register">registration form</button>, then pay the R99 registration fee and your first month by EFT.</p>
+        <p>Complete the <button class="link-btn" data-open="dlg-register">registration form</button>, then <button class="link-btn" data-pay="standard">pay your first month</button> plus the R99 registration fee by card with PayFast, or by EFT.</p>
       </li>
     </ol>
   </div>
@@ -618,6 +639,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
           <li>Exam prep, revision and progress tracking</li>
         </ul>
         <a class="btn btn-light" href="#trial">Start with a free week</a>
+        <button class="pay-link" data-pay="standard">Done with your trial? Pay and enrol</button>
       </div>
       <div class="plan">
         <h3>Family</h3>
@@ -629,11 +651,12 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
           <li>R199 less than two Standard plans</li>
         </ul>
         <a class="btn btn-ink" href="#trial">Start with a free week</a>
+        <button class="pay-link" data-pay="family">Done with your trial? Pay and enrol</button>
       </div>
     </div>
     <div class="fees-foot">
       <b>+ R99</b>
-      <p><strong>Once-off registration fee for each new learner, paid only if you stay on after the free week.</strong> It sets up their profile and gives them our worksheets, learning materials and a baseline assessment. Fees are due at the start of each month and aren’t refundable. See the <button class="link-btn" data-open="dlg-refund" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer">refund policy</button>.</p>
+      <p><strong>Once-off registration fee for each new learner, added to your first month’s payment.</strong> You only pay it if you stay on after the free week. It sets up their profile and gives them our worksheets, learning materials and a baseline assessment. Pay by card through PayFast, and it renews monthly, or by EFT. Fees aren’t refundable. See the <button class="link-btn" data-open="dlg-refund" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer">refund policy</button>.</p>
     </div>
   </div>
 </section>
@@ -762,11 +785,11 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       </details>
       <details>
         <summary>How do I pay?</summary>
-        <p>By EFT. We send our banking details on WhatsApp once your registration is confirmed. Fees are due at the start of each month.</p>
+        <p>By card through PayFast, South Africa’s secure payment gateway. Your first payment covers the R99 registration fee and the first month, then PayFast charges the monthly fee automatically. We never see your card details. You can also pay by EFT: we send our banking details on WhatsApp, and EFT fees are due at the start of each month.</p>
       </details>
       <details>
         <summary>Can I cancel?</summary>
-        <p>Yes, any time, by WhatsApp or email. There’s no contract. Cancelling takes effect at the end of the month you’ve paid for.</p>
+        <p>Yes, any time, by WhatsApp or email. There’s no contract. If you pay by card, we stop your PayFast subscription so you aren’t charged again. Cancelling takes effect at the end of the month you’ve paid for.</p>
       </details>
     </div>
   </div>
@@ -874,6 +897,39 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   </form>
 </dialog>
 
+<!-- Pay and enrol (PayFast) -->
+<dialog id="dlg-pay" aria-labelledby="pay-t">
+  <div class="dlg-head"><h3 id="pay-t">Pay and enrol</h3><button class="x" data-close aria-label="Close">&times;</button></div>
+  <div class="dlg-body">
+    <h4>Choose your plan</h4>
+    <div class="pay-plans">
+      <label><input type="radio" name="payplan" value="standard" checked><span><b>Standard</b>One learner, R499 a month</span></label>
+      <label><input type="radio" name="payplan" value="family"><span><b>Family</b>Two learners, R799 a month</span></label>
+    </div>
+    <div class="pay-sum" aria-live="polite">
+      <div><span id="ps-month">First month</span><span id="ps-month-v">R499</span></div>
+      <div><span id="ps-reg">Registration fee (once-off)</span><span id="ps-reg-v">R99</span></div>
+      <div class="tot"><span>Pay today</span><b id="ps-total">R598</b></div>
+      <div><span>Then each month</span><span id="ps-recur">R499</span></div>
+    </div>
+    <p class="pay-note">You pay by card on PayFast’s secure page, and PayFast charges the monthly fee automatically from then on. We never see your card details. Cancel any time on WhatsApp or email.</p>
+    <a class="btn btn-light" id="pay-go" href="#" target="_blank" rel="noopener">Continue to PayFast</a>
+    <p class="pay-alt">Prefer EFT? <a id="pay-eft" href="https://wa.me/27781861196" target="_blank" rel="noopener">Ask for our banking details on WhatsApp</a></p>
+  </div>
+</dialog>
+
+<!-- Shown when PayFast sends the parent back to #paid -->
+<dialog id="dlg-paid" aria-labelledby="paid-t">
+  <div class="dlg-head"><h3 id="paid-t">Payment received</h3><button class="x" data-close aria-label="Close">&times;</button></div>
+  <div class="dlg-body">
+    <div class="paid-tick" aria-hidden="true"></div>
+    <p>Thank you, and welcome to Lumos. PayFast will email you a receipt. We’ll confirm your place on WhatsApp within 24 hours and send this week’s timetable and the Teams link.</p>
+    <p style="margin-top:.75rem">If you haven’t filled in the registration form yet, please do it now so we know who the learner is.</p>
+    <button class="btn btn-light" data-open="dlg-register">Open the registration form</button>
+    <a class="btn btn-line" href="https://wa.me/27781861196?text=Hi%20Lumos%2C%20I%20have%20just%20paid%20on%20PayFast." target="_blank" rel="noopener">Let us know on WhatsApp</a>
+  </div>
+</dialog>
+
 <dialog id="dlg-terms" aria-labelledby="t-t">
   <div class="dlg-head"><h3 id="t-t">Terms and conditions</h3><button class="x" data-close aria-label="Close">&times;</button></div>
   <div class="dlg-body">
@@ -881,8 +937,8 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     <h4>2. Services</h4><p>Online tutoring for Grade 8 to 12 and matric via Microsoft Teams, covering Mathematics, Mathematical Literacy, Physical Sciences, Life Sciences, Geography, Accounting and Business Studies, for CAPS and IEB.</p>
     <h4>3. Registration</h4><p>A once-off R99 registration fee is payable on sign-up and is not refundable.</p>
     <h4>4. Free trial week</h4><p>New learners may join one week of classes free of charge for the subjects chosen when booking. No payment is taken for the trial week and there is no obligation to register afterwards. One free trial per learner.</p>
-    <h4>5. Fees</h4><ul><li>Standard plan: R499 per month</li><li>Family plan: R799 per month</li><li>One-on-one: R149 per hour</li><li>Fees are due at the start of each month</li></ul>
-    <h4>6. Cancellation</h4><p>Subscriptions are month to month. Cancel any time via WhatsApp or email. Cancellation takes effect at the end of the billing month.</p>
+    <h4>5. Fees</h4><ul><li>Standard plan: R499 per month</li><li>Family plan: R799 per month</li><li>One-on-one: R149 per hour</li><li>The first payment includes the R99 registration fee</li><li>Card payments are made through PayFast as a monthly subscription, charged automatically each month from the date of the first payment</li><li>EFT payments are due at the start of each month</li></ul>
+    <h4>6. Cancellation</h4><p>Subscriptions are month to month. Cancel any time via WhatsApp or email, and we will stop any PayFast subscription so no further payments are taken. Cancellation takes effect at the end of the billing month.</p>
     <h4>7. Refunds</h4><p>All payments are final and non-refundable.</p>
     <h4>8. Conduct</h4><p>Respectful conduct is required. Lumos may end services for misconduct without a refund.</p>
     <h4>9. Governing law</h4><p>These terms are governed by the laws of the Republic of South Africa.</p>
@@ -893,7 +949,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   <div class="dlg-head"><h3 id="p-t">Privacy policy</h3><button class="x" data-close aria-label="Close">&times;</button></div>
   <div class="dlg-body">
     <h4>1. Introduction</h4><p>Lumos Tutoring Academy (Pty) Ltd protects your personal information in line with POPIA.</p>
-    <h4>2. What we collect</h4><ul><li>Name, grade and curriculum</li><li>Phone number and email</li><li>Payment information</li><li>Class recordings, for learners to rewatch</li></ul>
+    <h4>2. What we collect</h4><ul><li>Name, grade and curriculum</li><li>Phone number and email</li><li>Payment records. Card payments are processed by PayFast, and we never see or store your card details</li><li>Class recordings, for learners to rewatch</li></ul>
     <h4>3. How we use it</h4><ul><li>To deliver tutoring</li><li>To communicate by WhatsApp and email</li><li>To process payments</li></ul>
     <h4>4. Sharing</h4><p>We don’t sell or share your personal information with third parties, except where the law requires it.</p>
     <h4>5. Your rights</h4><p>Email admin@lumostutoringacademy.co.za to see, correct or delete your information.</p>
@@ -938,6 +994,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     var opener = e.target.closest('[data-open]');
     if (opener){
       var d = document.getElementById(opener.getAttribute('data-open'));
+      var host = opener.closest('dialog'); if (host) host.close();
       if (d.id === 'dlg-register'){ var f = document.getElementById('reg-frame'); if (!f.src) f.src = f.dataset.src; }
       d.showModal();
       if (typeof gtag === 'function') gtag('event', 'open_' + d.id.replace('dlg-',''));
@@ -964,6 +1021,49 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     var msg = 'Hi Lumos, I would like to book one-on-one tutoring.\n\nSubject: ' + val('subject') + '\nGrade: ' + val('grade') + '\nHours: ' + h + '\nEstimate: R' + (149*h) + '\n\nPlease let me know which times are available.';
     window.open(WA + encodeURIComponent(msg), '_blank', 'noopener');
   });
+
+  // PayFast. Paste the link for each "Subscribe now" button from the PayFast
+  // dashboard here. While a link is empty, the pay button falls back to WhatsApp.
+  var PAYFAST = {
+    standard: '',
+    family: ''
+  };
+  var PLANS = {
+    standard: { name: 'Standard', month: 499, reg: 99, learners: 1 },
+    family:   { name: 'Family',   month: 799, reg: 99, learners: 2 }
+  };
+  var payDlg = document.getElementById('dlg-pay');
+  function rand(n){ return 'R' + n.toLocaleString('en-ZA'); }
+  function showPlan(key){
+    var p = PLANS[key], reg = p.reg * p.learners;
+    payDlg.querySelector('input[value="' + key + '"]').checked = true;
+    document.getElementById('ps-month-v').textContent = rand(p.month);
+    document.getElementById('ps-reg').textContent = 'Registration fee (once-off' + (p.learners > 1 ? ', R' + p.reg + ' per learner' : '') + ')';
+    document.getElementById('ps-reg-v').textContent = rand(reg);
+    document.getElementById('ps-total').textContent = rand(p.month + reg);
+    document.getElementById('ps-recur').textContent = rand(p.month);
+    var go = document.getElementById('pay-go'), url = PAYFAST[key];
+    var wa = WA + encodeURIComponent('Hi Lumos, we finished our free week and would like to enrol on the ' + p.name + ' plan (' + rand(p.month + reg) + ' today, then ' + rand(p.month) + ' a month). How do I pay?');
+    go.href = url || wa;
+    go.textContent = url ? 'Continue to PayFast' : 'Enrol on WhatsApp';
+    go.dataset.plan = key;
+    document.getElementById('pay-eft').href = WA + encodeURIComponent('Hi Lumos, I would like to enrol on the ' + p.name + ' plan and pay by EFT. Please send your banking details.');
+  }
+  payDlg.addEventListener('change', function(e){ if (e.target.name === 'payplan') showPlan(e.target.value); });
+  document.getElementById('pay-go').addEventListener('click', function(){
+    if (typeof gtag === 'function') gtag('event', 'begin_checkout', { plan: this.dataset.plan, method: PAYFAST[this.dataset.plan] ? 'payfast' : 'whatsapp' });
+  });
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-pay]');
+    if (!b) return;
+    showPlan(b.getAttribute('data-pay'));
+    payDlg.showModal();
+  });
+  if (location.hash === '#paid'){
+    document.getElementById('dlg-paid').showModal();
+    if (typeof gtag === 'function') gtag('event', 'purchase_return');
+    history.replaceState(null, '', location.pathname);
+  }
 
   // free trial week
   var trial = document.getElementById('trial-form');
