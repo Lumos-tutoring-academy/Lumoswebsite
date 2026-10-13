@@ -949,7 +949,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     <h4>2. Services</h4><p>Online tutoring for Grade 8 to 12 and matric via Microsoft Teams, covering Mathematics, Mathematical Literacy, Physical Sciences, Life Sciences, Geography, Accounting and Business Studies, for CAPS and IEB.</p>
     <h4>3. Registration</h4><p>A once-off R99 registration fee is payable on sign-up and is not refundable.</p>
     <h4>4. Free trial week</h4><p>New learners may join one week of classes free of charge for the subjects chosen when booking. No payment is taken for the trial week and there is no obligation to register afterwards. One free trial per learner.</p>
-    <h4>5. Fees</h4><ul><li>Standard plan: R499 per month</li><li>Family plan: R799 per month</li><li>One-on-one: R149 per hour</li><li>The first payment includes the R99 registration fee</li><li>Card payments are made through PayFast as a monthly subscription, charged automatically each month from the date of the first payment. For the Standard plan, PayFast charges R600 for the first payment and R500 a month after that</li><li>EFT payments are due at the start of each month</li></ul>
+    <h4>5. Fees</h4><ul><li>Standard plan: R499 per month</li><li>Family plan: R799 per month</li><li>One-on-one: R149 per hour</li><li>The first payment includes the R99 registration fee</li><li>Card payments are made through PayFast as a monthly subscription, charged automatically each month from the date of the first payment. PayFast charges R600 for the first payment and R500 a month after that for the Standard plan, and R1,000 for the first payment and R800 a month after that for the Family plan</li><li>EFT payments are due at the start of each month</li></ul>
     <h4>6. Cancellation</h4><p>Subscriptions are month to month. Cancel any time via WhatsApp or email, and we will stop any PayFast subscription so no further payments are taken. Cancellation takes effect at the end of the billing month.</p>
     <h4>7. Refunds</h4><p>All payments are final and non-refundable.</p>
     <h4>8. Conduct</h4><p>Respectful conduct is required. Lumos may end services for misconduct without a refund.</p>
@@ -1037,7 +1037,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   // PayFast. Paste the link for each "Subscribe now" button from the PayFast
   // dashboard here. While a link is empty, the pay button falls back to WhatsApp.
   // PayFast "Subscribe now" buttons, copied from the PayFast dashboard.
-  // A plan set to null falls back to WhatsApp until its button is made.
+  // A plan set to null falls back to WhatsApp.
   var PAYFAST = {
     action: 'https://payment.payfast.io/eng/process',
     standard: {
@@ -1047,7 +1047,13 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       amount: '600', item_name: 'Lumos Standard Plan',
       subscription_type: '1', recurring_amount: '500', cycles: '0', frequency: '3'
     },
-    family: null
+    family: {
+      cmd: '_paynow', receiver: '34281109',
+      return_url: 'https://lumostutoringacademy.co.za/#paid',
+      cancel_url: 'https://lumostutoringacademy.co.za/#fees',
+      amount: '1000', item_name: 'Lumos Family Plan',
+      subscription_type: '1', recurring_amount: '800', cycles: '0', frequency: '3'
+    }
   };
   var PLANS = {
     standard: { name: 'Standard', month: 499, reg: 99, learners: 1 },
