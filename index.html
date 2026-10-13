@@ -353,7 +353,7 @@ dialog::backdrop{background:rgba(22,25,29,.6)}
 .pay-note{margin-top:.9rem;font-size:.9rem;color:var(--slate)}
 .pay-alt{margin-top:.75rem;text-align:center;font-size:.92rem;color:var(--slate)}
 .pay-alt a{font-weight:700;color:var(--ink)}
-#dlg-pay .btn,#dlg-paid .btn{width:100%;margin-top:1rem}
+#dlg-pay .btn,#dlg-paid .btn,#dlg-booked .btn{width:100%;margin-top:1rem}
 .paid-tick{width:56px;height:56px;border-radius:50%;background:var(--light);display:grid;place-content:center;margin-bottom:1rem}
 .paid-tick::after{content:"";width:22px;height:11px;border-left:3.5px solid var(--ink);border-bottom:3.5px solid var(--ink);transform:translateY(-3px) rotate(-45deg)}
 @media (max-width:560px){.pay-plans{grid-template-columns:1fr}}
@@ -931,6 +931,22 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
 </dialog>
 
 <!-- Shown when PayFast sends the parent back to #paid -->
+<!-- Shown after a free-trial booking opens WhatsApp -->
+<dialog id="dlg-booked" aria-labelledby="booked-t">
+  <div class="dlg-head"><h3 id="booked-t">One last step</h3><button class="x" data-close aria-label="Close">&times;</button></div>
+  <div class="dlg-body">
+    <div class="paid-tick" aria-hidden="true"></div>
+    <p><strong>Press send in WhatsApp</strong> so we receive your booking. Your message to Lumos is already typed for you.</p>
+    <a class="btn btn-light" id="booked-wa" href="https://wa.me/27781861196" target="_blank" rel="noopener">WhatsApp didn’t open? Tap here</a>
+    <h4>What happens next</h4>
+    <ul>
+      <li>Within 24 hours we reply on WhatsApp with this week’s timetable and the Microsoft Teams link.</li>
+      <li><span id="booked-who">The learner</span> joins the live classes, Monday to Friday from 6 to 8pm, at no cost.</li>
+      <li>At the end of the week you decide whether to stay on. Nothing to pay until then.</li>
+    </ul>
+  </div>
+</dialog>
+
 <dialog id="dlg-paid" aria-labelledby="paid-t">
   <div class="dlg-head"><h3 id="paid-t">Payment received</h3><button class="x" data-close aria-label="Close">&times;</button></div>
   <div class="dlg-body">
@@ -1108,6 +1124,16 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     history.replaceState(null, '', location.pathname);
   }
 
+  // Google Sheet log of trial bookings. Paste the Apps Script web app URL here;
+  // while it is empty nothing is sent.
+  var TRIAL_SHEET_URL = '';
+  function saveTrial(row){
+    if (!TRIAL_SHEET_URL) return;
+    try {
+      fetch(TRIAL_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(row) });
+    } catch (err) {}
+  }
+
   // free trial week
   var trial = document.getElementById('trial-form');
   function tval(n){ var el = trial.querySelector('input[name="'+n+'"]:checked'); return el ? el.value : ''; }
@@ -1143,7 +1169,12 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       : 'Hi Lumos, ' + (parent ? 'my name is ' + parent + ' and ' : '') + 'I would like to book a free trial week for my child, ' + learner + '.';
     var msg = intro + '\n\nGrade: ' + grade + (curr ? '\nCurriculum: ' + curr : '') + '\nSubjects: ' + subj.join(', ') + '\nClasses: Monday to Friday, 6 to 8pm\n\nPlease send this week’s timetable and the Teams link.';
     if (typeof gtag === 'function') gtag('event', 'book_free_trial', { grade: grade, subjects: subj.join('|') });
-    window.open(WA + encodeURIComponent(msg), '_blank', 'noopener');
+    saveTrial({ who: who, learner: learner, parent: parent, grade: grade, curriculum: curr, subjects: subj.join(', ') });
+    var waUrl = WA + encodeURIComponent(msg);
+    window.open(waUrl, '_blank', 'noopener');
+    document.getElementById('booked-wa').href = waUrl;
+    document.getElementById('booked-who').textContent = learner;
+    document.getElementById('dlg-booked').showModal();
   });
 
   // enquiry form
