@@ -1124,16 +1124,6 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     history.replaceState(null, '', location.pathname);
   }
 
-  // Google Sheet log of trial bookings. Paste the Apps Script web app URL here;
-  // while it is empty nothing is sent.
-  var TRIAL_SHEET_URL = '';
-  function saveTrial(row){
-    if (!TRIAL_SHEET_URL) return;
-    try {
-      fetch(TRIAL_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(row) });
-    } catch (err) {}
-  }
-
   // free trial week
   var trial = document.getElementById('trial-form');
   function tval(n){ var el = trial.querySelector('input[name="'+n+'"]:checked'); return el ? el.value : ''; }
@@ -1169,7 +1159,6 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       : 'Hi Lumos, ' + (parent ? 'my name is ' + parent + ' and ' : '') + 'I would like to book a free trial week for my child, ' + learner + '.';
     var msg = intro + '\n\nGrade: ' + grade + (curr ? '\nCurriculum: ' + curr : '') + '\nSubjects: ' + subj.join(', ') + '\nClasses: Monday to Friday, 6 to 8pm\n\nPlease send this week’s timetable and the Teams link.';
     if (typeof gtag === 'function') gtag('event', 'book_free_trial', { grade: grade, subjects: subj.join('|') });
-    saveTrial({ who: who, learner: learner, parent: parent, grade: grade, curriculum: curr, subjects: subj.join(', ') });
     var waUrl = WA + encodeURIComponent(msg);
     window.open(waUrl, '_blank', 'noopener');
     document.getElementById('booked-wa').href = waUrl;
