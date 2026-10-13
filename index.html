@@ -920,6 +920,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     <div class="pay-sum" aria-live="polite">
       <div><span id="ps-month">First month</span><span id="ps-month-v">R499</span></div>
       <div><span id="ps-reg">Registration fee (once-off)</span><span id="ps-reg-v">R99</span></div>
+      <div id="ps-round-row" hidden><span>Rounded up at checkout</span><span id="ps-round">R2</span></div>
       <div class="tot"><span>Pay today</span><b id="ps-total">R598</b></div>
       <div><span>Then each month</span><span id="ps-recur">R499</span></div>
     </div>
@@ -948,7 +949,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     <h4>2. Services</h4><p>Online tutoring for Grade 8 to 12 and matric via Microsoft Teams, covering Mathematics, Mathematical Literacy, Physical Sciences, Life Sciences, Geography, Accounting and Business Studies, for CAPS and IEB.</p>
     <h4>3. Registration</h4><p>A once-off R99 registration fee is payable on sign-up and is not refundable.</p>
     <h4>4. Free trial week</h4><p>New learners may join one week of classes free of charge for the subjects chosen when booking. No payment is taken for the trial week and there is no obligation to register afterwards. One free trial per learner.</p>
-    <h4>5. Fees</h4><ul><li>Standard plan: R499 per month</li><li>Family plan: R799 per month</li><li>One-on-one: R149 per hour</li><li>The first payment includes the R99 registration fee</li><li>Card payments are made through PayFast as a monthly subscription, charged automatically each month from the date of the first payment</li><li>EFT payments are due at the start of each month</li></ul>
+    <h4>5. Fees</h4><ul><li>Standard plan: R499 per month</li><li>Family plan: R799 per month</li><li>One-on-one: R149 per hour</li><li>The first payment includes the R99 registration fee</li><li>Card payments are made through PayFast as a monthly subscription, charged automatically each month from the date of the first payment. For the Standard plan, PayFast charges R600 for the first payment and R500 a month after that</li><li>EFT payments are due at the start of each month</li></ul>
     <h4>6. Cancellation</h4><p>Subscriptions are month to month. Cancel any time via WhatsApp or email, and we will stop any PayFast subscription so no further payments are taken. Cancellation takes effect at the end of the billing month.</p>
     <h4>7. Refunds</h4><p>All payments are final and non-refundable.</p>
     <h4>8. Conduct</h4><p>Respectful conduct is required. Lumos may end services for misconduct without a refund.</p>
@@ -1035,9 +1036,18 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
 
   // PayFast. Paste the link for each "Subscribe now" button from the PayFast
   // dashboard here. While a link is empty, the pay button falls back to WhatsApp.
+  // PayFast "Subscribe now" buttons, copied from the PayFast dashboard.
+  // A plan set to null falls back to WhatsApp until its button is made.
   var PAYFAST = {
-    standard: '',
-    family: ''
+    action: 'https://payment.payfast.io/eng/process',
+    standard: {
+      cmd: '_paynow', receiver: '34281109',
+      return_url: 'https://lumostutoringacademy.co.za/#paid',
+      cancel_url: 'https://lumostutoringacademy.co.za/#fees',
+      amount: '600', item_name: 'Lumos Standard Plan',
+      subscription_type: '1', recurring_amount: '500', cycles: '0', frequency: '3'
+    },
+    family: null
   };
   var PLANS = {
     standard: { name: 'Standard', month: 499, reg: 99, learners: 1 },
@@ -1046,23 +1056,39 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   var payDlg = document.getElementById('dlg-pay');
   function rand(n){ return 'R' + n.toLocaleString('en-ZA'); }
   function showPlan(key){
-    var p = PLANS[key], reg = p.reg * p.learners;
+    var p = PLANS[key], reg = p.reg * p.learners, pf = PAYFAST[key];
+    // show exactly what PayFast will charge, which can differ from the list price
+    var today = pf ? +pf.amount : p.month + reg, monthly = pf ? +pf.recurring_amount : p.month;
     payDlg.querySelector('input[value="' + key + '"]').checked = true;
     document.getElementById('ps-month-v').textContent = rand(p.month);
     document.getElementById('ps-reg').textContent = 'Registration fee (once-off' + (p.learners > 1 ? ', R' + p.reg + ' per learner' : '') + ')';
     document.getElementById('ps-reg-v').textContent = rand(reg);
-    document.getElementById('ps-total').textContent = rand(p.month + reg);
-    document.getElementById('ps-recur').textContent = rand(p.month);
-    var go = document.getElementById('pay-go'), url = PAYFAST[key];
-    var wa = WA + encodeURIComponent('Hi Lumos, we finished our free week and would like to enrol on the ' + p.name + ' plan (' + rand(p.month + reg) + ' today, then ' + rand(p.month) + ' a month). How do I pay?');
-    go.href = url || wa;
-    go.textContent = url ? 'Continue to PayFast' : 'Enrol on WhatsApp';
+    var diff = today - (p.month + reg);
+    document.getElementById('ps-round-row').hidden = !diff;
+    document.getElementById('ps-round').textContent = (diff > 0 ? '+' : '') + rand(diff);
+    document.getElementById('ps-total').textContent = rand(today);
+    document.getElementById('ps-recur').textContent = rand(monthly);
+    var go = document.getElementById('pay-go');
+    var wa = WA + encodeURIComponent('Hi Lumos, we finished our free week and would like to enrol on the ' + p.name + ' plan (' + rand(today) + ' today, then ' + rand(monthly) + ' a month). How do I pay?');
+    go.href = pf ? PAYFAST.action : wa;
+    go.target = pf ? '_self' : '_blank';
+    go.textContent = pf ? 'Continue to PayFast' : 'Enrol on WhatsApp';
     go.dataset.plan = key;
     document.getElementById('pay-eft').href = WA + encodeURIComponent('Hi Lumos, I would like to enrol on the ' + p.name + ' plan and pay by EFT. Please send your banking details.');
   }
   payDlg.addEventListener('change', function(e){ if (e.target.name === 'payplan') showPlan(e.target.value); });
-  document.getElementById('pay-go').addEventListener('click', function(){
-    if (typeof gtag === 'function') gtag('event', 'begin_checkout', { plan: this.dataset.plan, method: PAYFAST[this.dataset.plan] ? 'payfast' : 'whatsapp' });
+  document.getElementById('pay-go').addEventListener('click', function(e){
+    var pf = PAYFAST[this.dataset.plan];
+    if (typeof gtag === 'function') gtag('event', 'begin_checkout', { plan: this.dataset.plan, method: pf ? 'payfast' : 'whatsapp' });
+    if (!pf) return;
+    // PayFast buttons are form posts, so build the same form and send it
+    e.preventDefault();
+    var f = document.createElement('form');
+    f.method = 'post'; f.action = PAYFAST.action;
+    Object.keys(pf).forEach(function(k){
+      var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = pf[k]; f.appendChild(i);
+    });
+    document.body.appendChild(f); f.submit();
   });
   document.addEventListener('click', function(e){
     var b = e.target.closest('[data-pay]');
