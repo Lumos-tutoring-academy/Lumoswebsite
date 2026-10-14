@@ -358,6 +358,13 @@ dialog::backdrop{background:rgba(22,25,29,.6)}
 .paid-tick::after{content:"";width:22px;height:11px;border-left:3.5px solid var(--ink);border-bottom:3.5px solid var(--ink);transform:translateY(-3px) rotate(-45deg)}
 @media (max-width:560px){.pay-plans{grid-template-columns:1fr}}
 
+.pay-row{display:grid;grid-template-columns:1.6fr 1fr;gap:0 .75rem}
+.pay-row.half{grid-template-columns:1fr 1fr}
+#pay-form h4{margin-top:1.4rem}
+#pay-form .field{margin-top:.6rem}
+#pay-form .field select{font:inherit;font-size:1rem;padding:.8rem .9rem;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+@media (max-width:560px){.pay-row,.pay-row.half{grid-template-columns:1fr}}
+
 /* responsive */
 @media (max-width:1020px){
   .menu{display:none}
@@ -931,6 +938,27 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       <div class="tot"><span>Pay today</span><b id="ps-total">R600</b></div>
       <div><span>Then each month</span><span id="ps-recur">R500</span></div>
     </div>
+    <form id="pay-form" novalidate>
+      <h4>Who is the tutoring for?</h4>
+      <div class="pay-row">
+        <div class="field"><label for="pl1-name">Learner’s name and surname</label><input id="pl1-name" autocomplete="off"></div>
+        <div class="field"><label for="pl1-grade">Grade</label><select id="pl1-grade"><option value="">Grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
+      </div>
+      <div class="pay-row" id="pl2-row" hidden>
+        <div class="field"><label for="pl2-name">Second learner’s name and surname</label><input id="pl2-name" autocomplete="off"></div>
+        <div class="field"><label for="pl2-grade">Grade</label><select id="pl2-grade"><option value="">Grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
+      </div>
+      <h4>Parent or guardian paying</h4>
+      <div class="pay-row half">
+        <div class="field"><label for="pp-first">First name</label><input id="pp-first" autocomplete="given-name"></div>
+        <div class="field"><label for="pp-last">Surname</label><input id="pp-last" autocomplete="family-name"></div>
+      </div>
+      <div class="pay-row half">
+        <div class="field"><label for="pp-email">Email</label><input id="pp-email" type="email" autocomplete="email"></div>
+        <div class="field"><label for="pp-cell">Cellphone</label><input id="pp-cell" type="tel" autocomplete="tel" placeholder="082 123 4567"></div>
+      </div>
+      <p class="err" id="pay-err" role="alert"></p>
+    </form>
     <p class="pay-note">You pay by card on PayFast’s secure page, and PayFast charges the monthly fee automatically from then on. We never see your card details. Cancel any time on WhatsApp or email.</p>
     <a class="btn btn-light" id="pay-go" href="#" target="_blank" rel="noopener">Continue to PayFast</a>
     <p class="pay-alt">Prefer EFT? <a id="pay-eft" href="https://wa.me/27781861196" target="_blank" rel="noopener">Ask for our banking details on WhatsApp</a></p>
@@ -1086,6 +1114,8 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   function rand(n){ return 'R' + n.toLocaleString('en-ZA'); }
   function showPlan(key){
     var p = PLANS[key], reg = p.reg * p.learners, pf = PAYFAST[key];
+    document.getElementById('pl2-row').hidden = p.learners < 2;
+    document.getElementById('pay-err').textContent = '';
     // show exactly what PayFast will charge, which can differ from the list price
     var today = pf ? +pf.amount : p.month + reg, monthly = pf ? +pf.recurring_amount : p.month;
     payDlg.querySelector('input[value="' + key + '"]').checked = true;
@@ -1106,16 +1136,51 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     document.getElementById('pay-eft').href = WA + encodeURIComponent('Hi Lumos, I would like to enrol on the ' + p.name + ' plan and pay by EFT. Please send your banking details.');
   }
   payDlg.addEventListener('change', function(e){ if (e.target.name === 'payplan') showPlan(e.target.value); });
+  payDlg.addEventListener('input', function(){ document.getElementById('pay-err').textContent = ''; });
+  function fval(id){ return document.getElementById(id).value.trim(); }
+  function payDetails(key){
+    var two = PLANS[key].learners > 1;
+    var learners = [{ name: fval('pl1-name'), grade: fval('pl1-grade') }];
+    if (two) learners.push({ name: fval('pl2-name'), grade: fval('pl2-grade') });
+    var d = { learners: learners, first: fval('pp-first'), last: fval('pp-last'), email: fval('pp-email'), cell: fval('pp-cell').replace(/[\s-]/g, '') };
+    if (d.cell.indexOf('+27') === 0) d.cell = '0' + d.cell.slice(3);
+    var miss = '';
+    learners.forEach(function(l, n){
+      if (!miss && l.name.split(/\s+/).length < 2) miss = 'Add the ' + (n ? 'second ' : '') + 'learner’s name and surname.';
+      if (!miss && !l.grade) miss = 'Choose the ' + (n ? 'second ' : '') + 'learner’s grade.';
+    });
+    if (!miss && (!d.first || !d.last)) miss = 'Add your first name and surname.';
+    if (!miss && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) miss = 'Add a valid email address. PayFast sends your receipt there.';
+    if (!miss && d.cell && !/^0\d{9}$/.test(d.cell)) miss = 'Check the cellphone number. It should be 10 digits, like 082 123 4567.';
+    return { d: d, miss: miss };
+  }
   document.getElementById('pay-go').addEventListener('click', function(e){
-    var pf = PAYFAST[this.dataset.plan];
-    if (typeof gtag === 'function') gtag('event', 'begin_checkout', { plan: this.dataset.plan, method: pf ? 'payfast' : 'whatsapp' });
+    var key = this.dataset.plan, pf = PAYFAST[key];
+    if (typeof gtag === 'function') gtag('event', 'begin_checkout', { plan: key, method: pf ? 'payfast' : 'whatsapp' });
     if (!pf) return;
-    // PayFast buttons are form posts, so build the same form and send it
     e.preventDefault();
+    var r = payDetails(key), err = document.getElementById('pay-err');
+    if (r.miss){ err.textContent = r.miss; return; }
+    err.textContent = '';
+    var d = r.d;
+    var who = d.learners.map(function(l){ return l.name + ' (' + l.grade + ')'; }).join(' & ');
+    var stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    // PayFast buttons are form posts: send the button's fields plus who the payment is for,
+    // so each payment shows the learner and parent in the PayFast dashboard and emails
+    var fields = Object.assign({}, pf, {
+      item_name: (pf.item_name + ' - ' + who).slice(0, 100),
+      item_description: ('Learner: ' + who + '. Paid by ' + d.first + ' ' + d.last + '.').slice(0, 255),
+      m_payment_id: ('LUMOS-' + stamp + '-' + d.learners[0].name.replace(/[^A-Za-z]/g, '').toUpperCase()).slice(0, 100),
+      custom_str1: d.learners.map(function(l){ return l.name; }).join(' & ').slice(0, 255),
+      custom_str2: d.learners.map(function(l){ return l.grade; }).join(' & ').slice(0, 255),
+      name_first: d.first.slice(0, 100), name_last: d.last.slice(0, 100),
+      email_address: d.email.slice(0, 100)
+    });
+    if (d.cell) fields.cell_number = d.cell;
     var f = document.createElement('form');
     f.method = 'post'; f.action = PAYFAST.action;
-    Object.keys(pf).forEach(function(k){
-      var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = pf[k]; f.appendChild(i);
+    Object.keys(fields).forEach(function(k){
+      var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = fields[k]; f.appendChild(i);
     });
     document.body.appendChild(f); f.submit();
   });
