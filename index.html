@@ -365,6 +365,12 @@ dialog::backdrop{background:rgba(22,25,29,.6)}
 #pay-form .field select{font:inherit;font-size:1rem;padding:.8rem .9rem;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
 @media (max-width:560px){.pay-row,.pay-row.half{grid-template-columns:1fr}}
 
+.pay-subj{margin-top:.75rem}
+.pay-subj .mini{display:block;font-weight:600;font-size:.92rem}
+.chips input:disabled+span{opacity:.35;cursor:not-allowed}
+.chips label:has(input:disabled){cursor:not-allowed}
+.maths-only{margin-top:.5rem;font-size:.88rem;font-weight:600;color:var(--ink-2)}
+
 /* responsive */
 @media (max-width:1020px){
   .menu{display:none}
@@ -557,7 +563,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
           <label><input type="radio" name="curr" value="Not sure"><span>Not sure</span></label>
         </div>
         <h4>Subjects to try <small>(choose any)</small></h4>
-        <div class="chips" id="t-subjects">
+        <div class="chips subj-chips" id="t-subjects">
           <label><input type="checkbox" name="subj" value="Mathematics"><span>Mathematics</span></label>
           <label><input type="checkbox" name="subj" value="Physical Sciences"><span>Physical Sciences</span></label>
           <label><input type="checkbox" name="subj" value="Life Sciences"><span>Life Sciences</span></label>
@@ -566,6 +572,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
           <label><input type="checkbox" name="subj" value="Geography"><span>Geography</span></label>
           <label><input type="checkbox" name="subj" value="Mathematical Literacy"><span>Maths Lit</span></label>
         </div>
+        <p class="maths-only" hidden>Grade 8 and 9 learners can only take Mathematics for now.</p>
         <div class="row2">
           <div class="field"><label for="t-learner">Learner’s name</label><input id="t-learner" autocomplete="off" required></div>
           <div class="field" id="t-parent-wrap"><label for="t-parent">Your name</label><input id="t-parent" autocomplete="name"></div>
@@ -942,12 +949,14 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
       <h4>Who is the tutoring for?</h4>
       <div class="pay-row">
         <div class="field"><label for="pl1-name">Learner’s name and surname</label><input id="pl1-name" autocomplete="off"></div>
-        <div class="field"><label for="pl1-grade">Grade</label><select id="pl1-grade"><option value="">Grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
+        <div class="field"><label for="pl1-grade">Grade</label><select id="pl1-grade" data-subj="pl1-subj"><option value="">Grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
       </div>
+      <div class="pay-subj" id="pl1-subj-wrap"><span class="mini">Subjects</span><div class="chips subj-chips" data-for="pl1-subj"><label><input type="checkbox" name="pl1-subj" value="Mathematics"><span>Mathematics</span></label><label><input type="checkbox" name="pl1-subj" value="Physical Sciences"><span>Physical Sciences</span></label><label><input type="checkbox" name="pl1-subj" value="Life Sciences"><span>Life Sciences</span></label><label><input type="checkbox" name="pl1-subj" value="Accounting"><span>Accounting</span></label><label><input type="checkbox" name="pl1-subj" value="Business Studies"><span>Business Studies</span></label><label><input type="checkbox" name="pl1-subj" value="Geography"><span>Geography</span></label><label><input type="checkbox" name="pl1-subj" value="Mathematical Literacy"><span>Maths Lit</span></label></div><p class="maths-only" hidden>Grade 8 and 9 learners can only take Mathematics for now.</p></div>
       <div class="pay-row" id="pl2-row" hidden>
         <div class="field"><label for="pl2-name">Second learner’s name and surname</label><input id="pl2-name" autocomplete="off"></div>
-        <div class="field"><label for="pl2-grade">Grade</label><select id="pl2-grade"><option value="">Grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
+        <div class="field"><label for="pl2-grade">Grade</label><select id="pl2-grade" data-subj="pl2-subj"><option value="">Grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
       </div>
+      <div class="pay-subj" id="pl2-subj-wrap" hidden><span class="mini">Second learner’s subjects</span><div class="chips subj-chips" data-for="pl2-subj"><label><input type="checkbox" name="pl2-subj" value="Mathematics"><span>Mathematics</span></label><label><input type="checkbox" name="pl2-subj" value="Physical Sciences"><span>Physical Sciences</span></label><label><input type="checkbox" name="pl2-subj" value="Life Sciences"><span>Life Sciences</span></label><label><input type="checkbox" name="pl2-subj" value="Accounting"><span>Accounting</span></label><label><input type="checkbox" name="pl2-subj" value="Business Studies"><span>Business Studies</span></label><label><input type="checkbox" name="pl2-subj" value="Geography"><span>Geography</span></label><label><input type="checkbox" name="pl2-subj" value="Mathematical Literacy"><span>Maths Lit</span></label></div><p class="maths-only" hidden>Grade 8 and 9 learners can only take Mathematics for now.</p></div>
       <h4>Parent or guardian paying</h4>
       <div class="pay-row half">
         <div class="field"><label for="pp-first">First name</label><input id="pp-first" autocomplete="given-name"></div>
@@ -1087,6 +1096,21 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
 
   // PayFast. Paste the link for each "Subscribe now" button from the PayFast
   // dashboard here. While a link is empty, the pay button falls back to WhatsApp.
+  // Grade 8 and 9 learners can only take Mathematics for now
+  function limitSubjects(box, grade){
+    var junior = /Grade (8|9)$/.test(grade || '');
+    box.querySelectorAll('input[type=checkbox]').forEach(function(c){
+      var off = junior && c.value !== 'Mathematics';
+      c.disabled = off; if (off) c.checked = false;
+      if (junior && c.value === 'Mathematics') c.checked = true;
+    });
+    var note = box.parentNode.querySelector('.maths-only'); if (note) note.hidden = !junior;
+  }
+  ['pl1', 'pl2'].forEach(function(id){
+    var sel = document.getElementById(id + '-grade');
+    sel.addEventListener('change', function(){ limitSubjects(document.querySelector('[data-for="' + id + '-subj"]'), sel.value); });
+  });
+
   // PayFast "Subscribe now" buttons, copied from the PayFast dashboard.
   // A plan set to null falls back to WhatsApp.
   var PAYFAST = {
@@ -1115,6 +1139,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   function showPlan(key){
     var p = PLANS[key], reg = p.reg * p.learners, pf = PAYFAST[key];
     document.getElementById('pl2-row').hidden = p.learners < 2;
+    document.getElementById('pl2-subj-wrap').hidden = p.learners < 2;
     document.getElementById('pay-err').textContent = '';
     // show exactly what PayFast will charge, which can differ from the list price
     var today = pf ? +pf.amount : p.month + reg, monthly = pf ? +pf.recurring_amount : p.month;
@@ -1140,14 +1165,16 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   function fval(id){ return document.getElementById(id).value.trim(); }
   function payDetails(key){
     var two = PLANS[key].learners > 1;
-    var learners = [{ name: fval('pl1-name'), grade: fval('pl1-grade') }];
-    if (two) learners.push({ name: fval('pl2-name'), grade: fval('pl2-grade') });
+    function subj(id){ return Array.prototype.map.call(document.querySelectorAll('input[name="' + id + '-subj"]:checked'), function(c){ return c.value; }); }
+    var learners = [{ name: fval('pl1-name'), grade: fval('pl1-grade'), subjects: subj('pl1') }];
+    if (two) learners.push({ name: fval('pl2-name'), grade: fval('pl2-grade'), subjects: subj('pl2') });
     var d = { learners: learners, first: fval('pp-first'), last: fval('pp-last'), email: fval('pp-email'), cell: fval('pp-cell').replace(/[\s-]/g, '') };
     if (d.cell.indexOf('+27') === 0) d.cell = '0' + d.cell.slice(3);
     var miss = '';
     learners.forEach(function(l, n){
       if (!miss && l.name.split(/\s+/).length < 2) miss = 'Add the ' + (n ? 'second ' : '') + 'learner’s name and surname.';
       if (!miss && !l.grade) miss = 'Choose the ' + (n ? 'second ' : '') + 'learner’s grade.';
+      if (!miss && !l.subjects.length) miss = 'Choose at least one subject for the ' + (n ? 'second ' : '') + 'learner.';
     });
     if (!miss && (!d.first || !d.last)) miss = 'Add your first name and surname.';
     if (!miss && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) miss = 'Add a valid email address. PayFast sends your receipt there.';
@@ -1169,10 +1196,11 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     // so each payment shows the learner and parent in the PayFast dashboard and emails
     var fields = Object.assign({}, pf, {
       item_name: (pf.item_name + ' - ' + who).slice(0, 100),
-      item_description: ('Learner: ' + who + '. Paid by ' + d.first + ' ' + d.last + '.').slice(0, 255),
+      item_description: (d.learners.map(function(l){ return l.name + ' (' + l.grade + '): ' + l.subjects.join(', '); }).join('. ') + '. Paid by ' + d.first + ' ' + d.last + '.').slice(0, 255),
       m_payment_id: ('LUMOS-' + stamp + '-' + d.learners[0].name.replace(/[^A-Za-z]/g, '').toUpperCase()).slice(0, 100),
       custom_str1: d.learners.map(function(l){ return l.name; }).join(' & ').slice(0, 255),
       custom_str2: d.learners.map(function(l){ return l.grade; }).join(' & ').slice(0, 255),
+      custom_str3: d.learners.map(function(l){ return l.subjects.join(', '); }).join(' & ').slice(0, 255),
       name_first: d.first.slice(0, 100), name_last: d.last.slice(0, 100),
       email_address: d.email.slice(0, 100)
     });
@@ -1201,6 +1229,7 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
   function tval(n){ var el = trial.querySelector('input[name="'+n+'"]:checked'); return el ? el.value : ''; }
   function tsubj(){ return Array.prototype.map.call(trial.querySelectorAll('input[name="subj"]:checked'), function(el){ return el.value; }); }
   function ticket(){
+    limitSubjects(document.getElementById('t-subjects'), tval('grade'));
     var learner = document.getElementById('t-learner').value.trim(), grade = tval('grade'), curr = tval('curr'), subj = tsubj();
     document.getElementById('t-parent-wrap').hidden = tval('who') === 'learner';
     document.getElementById('tk-learner').textContent = learner || 'Not added yet';
