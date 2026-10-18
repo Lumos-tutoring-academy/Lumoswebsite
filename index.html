@@ -383,6 +383,13 @@ dialog::backdrop{background:rgba(22,25,29,.6)}
 .step output{min-width:1.6em;text-align:center;font-weight:800}
 .step .u{font-size:.85rem;color:var(--slate)}
 
+.paywith{margin-top:1.1rem;border:1px solid var(--line);border-radius:12px;padding:.8rem 1rem}
+.paywith > span{display:block;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);margin-bottom:.55rem}
+.paylogos{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem 1.1rem}
+.paylogos img{height:24px;width:auto}
+.paylogos img[alt="Samsung Pay"]{height:17px}
+.paylogos img[alt^="Apple"]{height:28px}
+
 /* responsive */
 @media (max-width:1020px){
   .menu{display:none}
@@ -937,6 +944,16 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     </div>
     <div class="quote-box" aria-live="polite">
       <div><b id="b-total">R0</b><br><span id="b-detail">Choose at least one subject</span></div>
+    </div>
+    <div class="paywith">
+      <span>Ways to pay</span>
+      <div class="paylogos">
+        <img src="images/pay/visa-mastercard.png" alt="Visa and Mastercard" width="96" height="24">
+        <img src="images/pay/applepay.png" alt="Apple Pay" width="38" height="26">
+        <img src="images/pay/samsungpay.png" alt="Samsung Pay" width="120" height="21">
+        <img src="images/pay/instanteft.png" alt="Instant EFT by Payfast" width="82" height="30">
+        <img src="images/pay/scantopay.png" alt="QR code payments with Scan to Pay" width="116" height="29">
+      </div>
     </div>
     <p class="err" id="b-err" role="alert"></p>
     <button class="btn btn-light" type="submit" style="width:100%">Send booking request on WhatsApp</button>
