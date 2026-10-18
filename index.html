@@ -371,6 +371,18 @@ dialog::backdrop{background:rgba(22,25,29,.6)}
 .chips label:has(input:disabled){cursor:not-allowed}
 .maths-only{margin-top:.5rem;font-size:.88rem;font-weight:600;color:var(--ink-2)}
 
+.hours{display:grid;gap:.45rem;margin-top:.6rem}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:.75rem;border:1.5px solid var(--line);border-radius:10px;padding:.45rem .6rem .45rem .8rem}
+.hrow:has(input:checked){border-color:var(--ink)}
+.hrow:has(input:disabled){opacity:.4}
+.hsub{display:flex;align-items:center;gap:.6rem;font-weight:600;cursor:pointer;flex:1}
+.hsub input{width:18px;height:18px;accent-color:#16191D}
+.step{display:flex;align-items:center;gap:.35rem}
+.step button{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--ink)}
+.step button:disabled{opacity:.35;cursor:not-allowed}
+.step output{min-width:1.6em;text-align:center;font-weight:800}
+.step .u{font-size:.85rem;color:var(--slate)}
+
 /* responsive */
 @media (max-width:1020px){
   .menu{display:none}
@@ -631,14 +643,14 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     <div class="plans">
       <div class="plan">
         <h3>One-on-one</h3>
-        <p class="who">Private lessons in one subject</p>
+        <p class="who">Private lessons in one or more subjects</p>
         <p class="price">R150<small>/ hour</small></p>
         <ul>
           <li>Lessons set around your child’s pace and goals</li>
           <li>Focused help before tests and exams</li>
           <li>Book as many hours as you need</li>
         </ul>
-        <button class="btn btn-line" data-open="dlg-book">Work out a price</button>
+        <button class="btn btn-line" data-open="dlg-book">Book one-on-one lessons</button>
       </div>
       <div class="plan main">
         <span class="tag">Most families choose this</span>
@@ -891,41 +903,44 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
 
 <!-- One-on-one price calculator -->
 <dialog id="dlg-book" aria-labelledby="book-t">
-  <div class="dlg-head"><h3 id="book-t">Price a one-on-one booking</h3><button class="x" data-close aria-label="Close">&times;</button></div>
-  <form class="dlg-body" id="book">
-    <h4>Subject</h4>
-    <div class="chips" id="b-subject">
-      <label><input type="radio" name="subject" value="Mathematics" checked><span>Mathematics</span></label>
-      <label><input type="radio" name="subject" value="Physical Sciences"><span>Physical Sciences</span></label>
-      <label><input type="radio" name="subject" value="Life Sciences"><span>Life Sciences</span></label>
-      <label><input type="radio" name="subject" value="Accounting"><span>Accounting</span></label>
-      <label><input type="radio" name="subject" value="Business Studies"><span>Business Studies</span></label>
-      <label><input type="radio" name="subject" value="Geography"><span>Geography</span></label>
-      <label><input type="radio" name="subject" value="Mathematical Literacy"><span>Maths Lit</span></label>
+  <div class="dlg-head"><h3 id="book-t">Book one-on-one lessons</h3><button class="x" data-close aria-label="Close">&times;</button></div>
+  <form class="dlg-body" id="book" novalidate>
+    <h4>Learner</h4>
+    <div class="pay-row">
+      <div class="field"><label for="b-name">Name and surname</label><input id="b-name" autocomplete="off"></div>
+      <div class="field"><label for="b-grade">Grade</label><select id="b-grade"><option value="">Choose a grade</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option><option>Upgrading</option></select></div>
     </div>
-    <h4>Grade</h4>
-    <div class="chips">
-      <label><input type="radio" name="grade" value="Grade 8"><span>8</span></label>
-      <label><input type="radio" name="grade" value="Grade 9"><span>9</span></label>
-      <label><input type="radio" name="grade" value="Grade 10"><span>10</span></label>
-      <label><input type="radio" name="grade" value="Grade 11"><span>11</span></label>
-      <label><input type="radio" name="grade" value="Grade 12" checked><span>12</span></label>
-      <label><input type="radio" name="grade" value="Matric upgrading"><span>Upgrading</span></label>
+    <div class="chips" style="margin-top:.75rem">
+      <label><input type="radio" name="b-curr" value="CAPS"><span>CAPS</span></label>
+      <label><input type="radio" name="b-curr" value="IEB"><span>IEB</span></label>
+      <label><input type="radio" name="b-curr" value="Not sure"><span>Not sure</span></label>
     </div>
-    <h4>Hours</h4>
-    <div class="chips">
-      <label><input type="radio" name="hours" value="1" checked><span>1</span></label>
-      <label><input type="radio" name="hours" value="2"><span>2</span></label>
-      <label><input type="radio" name="hours" value="3"><span>3</span></label>
-      <label><input type="radio" name="hours" value="4"><span>4</span></label>
-      <label><input type="radio" name="hours" value="6"><span>6</span></label>
-      <label><input type="radio" name="hours" value="8"><span>8</span></label>
-      <label><input type="radio" name="hours" value="10"><span>10</span></label>
+    <h4>Subjects and hours <small style="font-weight:500;color:var(--slate)">(choose one or more)</small></h4>
+    <div class="hours" id="b-subjects">
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Mathematics"><span>Mathematics</span></label><div class="step" aria-label="Hours of Mathematics"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Physical Sciences"><span>Physical Sciences</span></label><div class="step" aria-label="Hours of Physical Sciences"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Life Sciences"><span>Life Sciences</span></label><div class="step" aria-label="Hours of Life Sciences"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Accounting"><span>Accounting</span></label><div class="step" aria-label="Hours of Accounting"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Business Studies"><span>Business Studies</span></label><div class="step" aria-label="Hours of Business Studies"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Geography"><span>Geography</span></label><div class="step" aria-label="Hours of Geography"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+        <div class="hrow"><label class="hsub"><input type="checkbox" name="b-subj" value="Mathematical Literacy"><span>Maths Lit</span></label><div class="step" aria-label="Hours of Maths Lit"><button type="button" data-d="-1" aria-label="Fewer hours">&minus;</button><output data-h>1</output><button type="button" data-d="1" aria-label="More hours">+</button><span class="u">hrs</span></div></div>
+    </div>
+    <p class="maths-only" id="b-maths-only" hidden>Grade 8 and 9 learners can only take Mathematics for now.</p>
+    <h4>When suits you? <small style="font-weight:500;color:var(--slate)">(optional)</small></h4>
+    <div class="chips"><label><input type="checkbox" name="b-day" value="Mon"><span>Mon</span></label><label><input type="checkbox" name="b-day" value="Tue"><span>Tue</span></label><label><input type="checkbox" name="b-day" value="Wed"><span>Wed</span></label><label><input type="checkbox" name="b-day" value="Thu"><span>Thu</span></label><label><input type="checkbox" name="b-day" value="Fri"><span>Fri</span></label><label><input type="checkbox" name="b-day" value="Sat"><span>Sat</span></label><label><input type="checkbox" name="b-day" value="Sun"><span>Sun</span></label></div>
+    <div class="chips" style="margin-top:.5rem"><label><input type="checkbox" name="b-time" value="Morning"><span>Morning</span></label><label><input type="checkbox" name="b-time" value="Afternoon"><span>Afternoon</span></label><label><input type="checkbox" name="b-time" value="Evening"><span>Evening</span></label></div>
+    <div class="field"><label for="b-notes">Anything the tutor should know? <small style="font-weight:500;color:var(--slate)">(optional)</small></label><input id="b-notes" placeholder="For example: test on functions next Friday"></div>
+    <h4>Parent or guardian</h4>
+    <div class="pay-row half">
+      <div class="field"><label for="b-parent">Name and surname</label><input id="b-parent" autocomplete="name"></div>
+      <div class="field"><label for="b-cell">Cellphone</label><input id="b-cell" type="tel" autocomplete="tel" placeholder="082 123 4567"></div>
     </div>
     <div class="quote-box" aria-live="polite">
-      <div><b id="b-total">R150</b><br><span id="b-detail">1 hour at R150</span></div>
-      <button class="btn btn-light" type="submit">Send booking on WhatsApp</button>
+      <div><b id="b-total">R0</b><br><span id="b-detail">Choose at least one subject</span></div>
     </div>
+    <p class="err" id="b-err" role="alert"></p>
+    <button class="btn btn-light" type="submit" style="width:100%">Send booking request on WhatsApp</button>
+    <p class="pay-alt">We confirm the tutor and times on WhatsApp, then send payment details.</p>
   </form>
 </dialog>
 
@@ -1078,19 +1093,57 @@ html{scroll-behavior:smooth;scroll-padding-top:88px}
     d.addEventListener('click', function(e){ if (e.target === d) d.close(); });
   });
 
-  // one-on-one calculator
-  var book = document.getElementById('book');
-  function val(n){ var el = book.querySelector('input[name="'+n+'"]:checked'); return el ? el.value : ''; }
-  function quote(){
-    var h = +val('hours'), total = 150*h;
-    document.getElementById('b-total').textContent = 'R' + total.toLocaleString('en-ZA');
-    document.getElementById('b-detail').textContent = h + (h > 1 ? ' hours' : ' hour') + ' at R150, ' + val('subject');
+  // one-on-one booking: several subjects, hours per subject, sent to WhatsApp
+  var book = document.getElementById('book'), RATE = 150, MAXH = 10;
+  var bRows = Array.prototype.slice.call(book.querySelectorAll('.hrow'));
+  function bVal(n){ var el = book.querySelector('input[name="'+n+'"]:checked'); return el ? el.value : ''; }
+  function bAll(n){ return Array.prototype.map.call(book.querySelectorAll('input[name="'+n+'"]:checked'), function(c){ return c.value; }); }
+  function bChosen(){
+    return bRows.filter(function(r){ return r.querySelector('input').checked; })
+      .map(function(r){ return { subject: r.querySelector('input').value, hours: +r.querySelector('[data-h]').value }; });
   }
-  book.addEventListener('change', quote); quote();
+  function bRefresh(){
+    var junior = /Grade (8|9)$/.test(document.getElementById('b-grade').value);
+    document.getElementById('b-maths-only').hidden = !junior;
+    bRows.forEach(function(r){
+      var c = r.querySelector('input'), h = +r.querySelector('[data-h]').value;
+      c.disabled = junior && c.value !== 'Mathematics'; if (c.disabled) c.checked = false;
+      r.querySelector('[data-d="-1"]').disabled = !c.checked || h <= 1;
+      r.querySelector('[data-d="1"]').disabled = !c.checked || h >= MAXH;
+    });
+    var chosen = bChosen(), hrs = chosen.reduce(function(t, x){ return t + x.hours; }, 0);
+    document.getElementById('b-total').textContent = 'R' + (RATE * hrs).toLocaleString('en-ZA');
+    document.getElementById('b-detail').textContent = chosen.length
+      ? hrs + (hrs > 1 ? ' hours' : ' hour') + ' at R' + RATE + ': ' + chosen.map(function(x){ return x.subject + ' ' + x.hours + 'h'; }).join(', ')
+      : 'Choose at least one subject';
+  }
+  bRows.forEach(function(r){
+    r.querySelectorAll('[data-d]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var out = r.querySelector('[data-h]');
+        out.value = Math.min(MAXH, Math.max(1, +out.value + +btn.dataset.d)); out.textContent = out.value;
+        bRefresh();
+      });
+    });
+  });
+  book.addEventListener('change', bRefresh); book.addEventListener('input', function(){ document.getElementById('b-err').textContent = ''; });
+  bRefresh();
   book.addEventListener('submit', function(e){
     e.preventDefault();
-    var h = +val('hours');
-    var msg = 'Hi Lumos, I would like to book one-on-one tutoring.\n\nSubject: ' + val('subject') + '\nGrade: ' + val('grade') + '\nHours: ' + h + '\nEstimate: R' + (150*h) + '\n\nPlease let me know which times are available.';
+    var name = document.getElementById('b-name').value.trim(), grade = document.getElementById('b-grade').value,
+        parent = document.getElementById('b-parent').value.trim(), cell = document.getElementById('b-cell').value.trim(),
+        notes = document.getElementById('b-notes').value.trim(), chosen = bChosen(), err = document.getElementById('b-err');
+    var miss = name.split(/\s+/).length < 2 ? 'Add the learner’s name and surname.' : !grade ? 'Choose the learner’s grade.' : !chosen.length ? 'Choose at least one subject.' : !parent ? 'Add your name.' : '';
+    if (miss){ err.textContent = miss; return; }
+    var hrs = chosen.reduce(function(t, x){ return t + x.hours; }, 0), days = bAll('b-day'), times = bAll('b-time'), curr = bVal('b-curr');
+    var msg = 'Hi Lumos, I would like to book one-on-one lessons.\n\n' +
+      'Learner: ' + name + ' (' + grade + (curr ? ', ' + curr : '') + ')\n' +
+      'Subjects: ' + chosen.map(function(x){ return x.subject + ' (' + x.hours + (x.hours > 1 ? ' hours' : ' hour') + ')'; }).join(', ') + '\n' +
+      'Total: ' + hrs + (hrs > 1 ? ' hours' : ' hour') + ', R' + (RATE * hrs).toLocaleString('en-ZA') + '\n' +
+      (days.length || times.length ? 'Preferred times: ' + days.concat(times).join(', ') + '\n' : '') +
+      (notes ? 'Notes: ' + notes + '\n' : '') +
+      '\nParent: ' + parent + (cell ? ', ' + cell : '') + '\n\nPlease confirm the tutor and times.';
+    if (typeof gtag === 'function') gtag('event', 'book_one_on_one', { hours: hrs, subjects: chosen.length });
     window.open(WA + encodeURIComponent(msg), '_blank', 'noopener');
   });
 
